@@ -1,60 +1,72 @@
 PUBLIC DeleteMostEvenColumn
 
 
-codemain SEGMENT para public 'CODE' ; главный сегмент
-    DeleteMostEvenColumn:
-        push di
+codemain SEGMENT para public 'CODE' ; сегмент задачи
+    DeleteMostEvenColumn: ; Удаление столбца с наибольшим числом чётных чисел в матрице
+    ; Если столбцов с максимальным количеством несколько, то удаляется первый
+    ; ds:di - Матрица в формате, первые два байта - кол-во столбцов и строк матрицы, далее её элементы построчно
+        push di ; Запоминаем в стеке исходный адрес матрицы
 
         mov al, [di] ; Столбцы
         inc di
         mov ah, [di] ; Строки
         inc di
 
+        ; Ищем индекс столбца с максимальным числом чёётных чисел
         call findEvenMat
-        
+        ; cl - индекс искомого столбца
+        ; Переносим его в bl
         xor bl, bl
         mov bl, cl
 
+
+        ; Удаляем столбец матрицы с индексом bl
         call deleteColumn
 
-        pop di
-        dec al
-        mov [di], al
+        pop di ; Возвращаем адрес матрицы
+        dec al ; Уменьшеаем количество столбцов на 1
+        mov [di], al ; записываем кол-во столбцов
 
 
         ret
 
 
-    findEvenMat: ; di - матрица, es:di - массив, куда записываются количетсво чётных в каждом столбце
-    ; ah - кол-во строк матрицы, al - количество столбцова матрицы
+    findEvenMat: ; ds:di - матрица, 
+    ; ah - кол-во строк матрицы, al - количество столбцо матрицы
     ; result: cx - номер столбца, с максимальным числом чётных
         push di
 
         xor bx, bx
-        xor cx, cx ; ch - индекс максимального столбца, cl - его значение
+        xor cx, cx ; ch - индекс максимального столбца, cl - кол-во столбцов
 
+        ; Ищем максимальное по все столбцам
         countEvenMat:
 
-            call countEvenColumn
-            cmp dl, cl
+            call countEvenColumn ; Считаем столбец матрицы по адресу di
+            ; в dl - кол-во чётных чисел
+            cmp dl, cl ; Если больше текущего максимального, то нынешний становится новым максимальнымц
             jle smaller
 
+            ; Новый максимальный столбец
             mov ch, bl
             mov cl, dl
 
             smaller:
+            ; Переход к следующему столбцу
             inc bl
             inc di
             cmp bl, al
-            jl countEvenMat
+            jl countEvenMat ; Пока bl < al
         
+        ; Индекс столбца в cl
         mov cl, ch
         xor ch, ch
 
         pop di
         ret
     
-    countEvenColumn: ; ds:di - первое число нужного столбца, 
+    countEvenColumn: ; Считает кол-во чётных элементов в столбце матрицы
+    ; ds:di - первое число нужного столбца, 
     ; ah - кол-во строк матрицы, al - количество столбцова матрицы
     ; result: dl - количество чётных в столбце числом чётных
         push di
@@ -63,86 +75,92 @@ codemain SEGMENT para public 'CODE' ; главный сегмент
         xor dx, dx
         
         count:
-            mov dx, [di]
-            test dx, 1
+            mov dx, [di] ; Текущее число
+            test dx, 1 ; Проверяем последний бит числа(если zf=1, то число чётное)
             jnz no
-            inc cl
+            inc cl ; Увеличиваем счётчик чётных чисел
             no:
 
             xor dx, dx
             mov dl, al
-            add di, dx
+            add di, dx ; Сдвигаем di на кол-во столбцов(на следующий элемент столбца)
 
             inc ch
             cmp ch, ah
-            jl count
+            jl count ; Пока прошли не все строки
         
         xor dx, dx
-        mov dl, cl
+        mov dl, cl ; В dl помещаем кол-во чётных в столбце
 
         pop cx
         pop di
         ret
 
-    deleteColumn:; ds:di - матрица, bl - индекс удаляемого столбца
+    deleteColumn: ; Удаление столбца матрицы
+    ; ds:di - матрица, bl - индекс удаляемого столбца
     ; ah - кол-во строк матрицы, al - количество столбцов матрицы
         push di
 
-        xor cx, cx
-        mov cl, ah
+        xor cx, cx ; Счётчик цикла
+        mov cl, ah 
 
         mov dx, di
         add dl, bl
-        mov di, dx
+        mov di, dx ; Смещаем указатель на удаляемый столбец
 
         deleteloop:
             xor dx, dx
-            add dl, al
-
+            ; Считаем кол-во элементов в матрице после текущего
+            add dl, al ; Кол-во элементов в столбце
+            
+            ; Умножаем на оставшееся число строк
             push ax
             mov al, cl
             mul dl
             mov dx, ax
             pop ax
 
-            sub dl, bl
-            dec dl
-
-            call shiftArray
-
+            sub dl, bl ; Вычитаем кол-во элементов левее текущего
+            dec dl ; Вычитаем текущий
             
-            mov dx, di
-            add dl, al
-            dec dl
+            call shiftArray ; Смещаем влево все элементы после текущего на 1
+            ; Тем самым удаляя его
+
+            mov dx, di 
+            add dl, al ; Сдвигаем указатель матрицы на следующий элемент в стобце
+            dec dl ; Вычитаем 1, так как матрица съехала из-за смещения
             mov di, dx
 
-            loop deleteloop
+            loop deleteloop ; Пока не прошли по всем строкам
 
 
         pop di
         ret
 
-    shiftArray: ; dx - Количество смещаемых ячеек
+    shiftArray: ; Смещает dx байт влево на 1 в ds:di
+    ; dx - Количество смещаемых ячеек
         push si
         push di
         push cx
 
 
         mov cx, dx
-        jz shiftReturn
+        jz shiftReturn ; Если кол-во смещаемых ячеек 0
 
         mov dx, di
         inc dx
-        mov si, dx
+        mov si, dx ; [si] - смещаемый элемент
 
         shiftLoop:
+            ; Смещаем элемент [si] в [di](на одну влево)
             mov dl, [si]
             mov [di], dl
-
+            
+            ; Сдвигаем указатели
             inc di
             inc si
 
-            loop shiftLoop
+            loop shiftLoop ; Пока не прошли по всем смещаемым
 
         
         

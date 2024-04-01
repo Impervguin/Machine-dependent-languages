@@ -19,9 +19,15 @@ codemain SEGMENT para public 'CODE' ; главный сегмент
         mov ax, matdata
         mov ds, ax
         mov di, OFFSET w
+        
         call matInput
+        cmp ax, 0
+        je terminate
+
         call DeleteMostEvenColumn
         call PrintMat
+
+        terminate:
         mov ah, 4Ch ; Код завершения
         int 21h
 codemain ENDS

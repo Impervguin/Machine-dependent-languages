@@ -14,79 +14,130 @@ inputStr SEGMENT para public 'DATA'
            db 10
            db "Input matrix(nums without spaces or enters): "
            db "$"
+    einput db 13
+           db 10
+           db "Incorrect input."
+           db "$"
+    newline db 13
+            db 10
+            db "$"
+    rowinput db 13
+             db 10
+             db "Row "
+             db "$"
 inputStr ENDS
 
 
 codeInput SEGMENT para public 'CODE' ; сегмент ввода матрицы
     ASSUME es:inputStr
-    MatInput: ; Считывает матрицу в адрес es:dx,
-    ; где сначала байт ширина, байт высота, далее матрица в транспонированном виде
+    MatInput: ; Считывает матрицу в адрес ds:di,
+    ; где сначала байт кол-ва столбцов, байт кол-во строк, далее матрица построчно
+    ; result: ah - кол-во строк, al - кол-во столбцов
         push di
+        ; В es сегмент с текстом ввода
         mov ax, inputStr
         mov es, ax
         
-
+        ; Приглашение ввода кол-во столбцов(ширины)
         mov dx, OFFSET winput
         call writeMsgES
 
+        ; Ввод числа
         call digitInput
-        jz return
+        jnz error
+        and al, al
+        jz error
         mov [di], al
         mov bl, al ; записываем в bl количество столбцов
         inc di
 
+        ; Приглашение ко вводу кол-ва строк
         mov dx, OFFSET hinput
         call writeMsgES
-
+        
+        ; Ввод высота
         call digitInput
-        jz return
+        jnz error
+        and al, al
+        jz error
         mov [di], al
         mov bh, al ; записываем в bh количество строк
         inc di
 
         mov ax, bx
+        
+        ; Приглашение к вводу матрицы
         mov dx, OFFSET minput
         call writeMsgES
 
-        call inputMatrix
+        call inputMatrix ; Ввод матрицы
+        jz return
 
+        error: ; В случае ошибки зануляем размеры ввёденной матрицы
+            xor ax, ax
+            pop di
+            push di
+            mov [di], ax
+            inc di
+            mov [di], ax
+            mov dx, OFFSET einput
+            call writeMsgES
+        
         return:
             pop di
             retf
     
-    digitInput:
+    digitInput: ; Ввод цифры
+        ; ah - Введённая цифра
+        ; zf=1 - Успех, zf=0 - неудача
         mov ah, 01h
         int 21h
 
         sub al, 30h
         cmp al, 10
+        jge digitInputError
         
+        xor ah, ah ; zf=1
         ret
+        digitInputError:
+            inc al ; zf=0
+            ret
+
     
     writeMsgES: ; Пишет в консоль строку по адресу es:dx
         push ax
         push ds
+        ; Переводим регистр es в ds
         mov ax, es
         mov ds, ax
 
-        mov ah, 09h
+        mov ah, 09h ; Вывод строки по адресу ds:dx
         int 21h
 
         pop ds
         pop ax
         ret
     
-    inputMatrix: ; Ввод матрицы в транспонированном виде, ah - Кол-во строк, al - столбцов
+    inputMatrix: ; Ввод матрицы в транспонированном виде, ah - Кол-во строк, al - столбцов, ds:di - матрица
+        ; zf=1 - Успех, zf=0 - неудача
         push di
         xor cx, cx ; Записываем в стек 0, как текущий индекс итерации
         push cx
         Lmat:
+            ; Приглашение ко вводу
+            push ax 
+            mov al, cl ; al - Номер вводимой строки
+            inc al
+            call RowString
+            pop ax
+
+
             xor cl, cl ; Зануляем cl, в котором будем хранить текущую итерацию ввода строки
             mov ch, al ; В ch храним количество столбцов матрицы
             push ax ; Запоминаем ax
             Lrow: ; Ввод строки
                 call digitInput
-                jz errInput
+                jnz errInput
                 
                 mov [di], al ; Записываем введённую цифру в соотв строку столбца
                 inc di
@@ -103,19 +154,39 @@ codeInput SEGMENT para public 'CODE' ; сегмент ввода матрицы
 
             cmp cl, ah ; Пока не ввели все строки
             jl Lmat
-        
-        returnMat:
-            pop cx
-            pop di ; Возвращаем di к началу матрицы
-            ret
+        jmp returnMat
         errInput:
             pop ax
             pop cx
             pop di
-            mov dx, 0
-            mov [di], dl
+            inc dx ; zf=0
+            ret
+        returnMat:
+            pop cx
+            pop di ; Возвращаем di к началу матрицы
+            xor dx, dx ; zf=1
             ret
         
+    RowString: ; Вывод приглащения ко вводу строки матрицы
+    ; al - Номер вводимой строки
+        push dx
+        mov dx, OFFSET rowinput 
+        call writeMsgES
+        
+        mov dl, al
+        add dl, 30h ; Номер строки
+        mov ah, 02h
+        int 21h
+
+        mov dl, 3Ah ; Двоеточие
+        int 21h
+
+        mov dl, 20h ; Пробел
+        int 21h
+
+        pop dx
+        ret
+
 
 codeInput ENDS
 END 
