@@ -1,6 +1,7 @@
 .model tiny
-INTCODE EQU 08h
-INSTALLED EQU 29h
+; 08h тоже подходит
+INTCODE EQU 1Ch
+INSTALLED EQU 1Ch
 MINSPEED EQU 00011111b
 MAXSPEED EQU 0
 TICKSPERSECOND EQU 18
@@ -18,19 +19,18 @@ code SEGMENT para public 'code'
         installation dw 1 dup(INSTALLED) ; Флаг установки резидента
 
     resident: ; Резидентная часть
-        push ax
-        push bx
-        push cx
-        push dx
+        ; push ax
+        ; push bx
+        ; push cx
+        ; push dx
         
         ; Предыдущее прерывание
-        pushf
-        push cs
-        mov ax, offset afterprev
-        push ax
-        jmp cs:prev
+        ; pushf
+        ; push cs
+        ; mov ax, offset afterprev
+        ; push ax
+        ; jmp cs:prev
 
-        afterprev:
         inc ticks
         cmp error, 4 ; Если 5-я секунда, то на один тик больше
         jl werror
@@ -64,10 +64,19 @@ code SEGMENT para public 'code'
         jmp return
 
     return: ; Завершение резидента
-        pop ax
-        pop bx
-        pop cx
-        pop dx
+        ; pop ax
+        ; pop bx
+        ; pop cx
+        ; pop dx
+        ; Предыдущее прерывание
+        pushf
+        push cs
+        mov ax, offset afterprev
+        push ax
+        ; Без этого выводит на каждый тик символы прерывание 08
+        mov ax, 0
+        jmp cs:prev
+    afterprev:
         iret
     
     initialize: ; Инициализация резидента
