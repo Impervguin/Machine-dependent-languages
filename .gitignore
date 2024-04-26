@@ -1,4 +1,9 @@
 Task*/*.EXE
 Task*/*.EXE
+*.exe
+*.disasm
 *.OBJ
 *.obj
+*.o
+*.COM
+*.com
