@@ -35,6 +35,7 @@ codemain SEGMENT para public 'CODE' ; сегмент задачи
     ; ah - кол-во строк матрицы, al - количество столбцо матрицы
     ; result: cx - номер столбца, с максимальным числом чётных
         push di
+        push ax
 
         xor bx, bx
         xor cx, cx ; ch - индекс максимального столбца, cl - кол-во столбцов
@@ -61,18 +62,21 @@ codemain SEGMENT para public 'CODE' ; сегмент задачи
         ; Индекс столбца в cl
         mov cl, ch
         xor ch, ch
-
+        pop ax
         pop di
         ret
     
     countEvenColumn: ; Считает кол-во чётных элементов в столбце матрицы
     ; ds:di - первое число нужного столбца, 
-    ; ah - кол-во строк матрицы, al - количество столбцова матрицы
+    ; ah - кол-во строк матрицы, al - количество столбцов матрицы
     ; result: dl - количество чётных в столбце числом чётных
         push di
         push cx
+        push ax
         xor cx, cx ; ch - итерация, cl - количество чётных
         xor dx, dx
+
+        mov al, 9 ; Из-за хранения
         
         count:
             mov dx, [di] ; Текущее число
@@ -92,6 +96,7 @@ codemain SEGMENT para public 'CODE' ; сегмент задачи
         xor dx, dx
         mov dl, cl ; В dl помещаем кол-во чётных в столбце
 
+        pop ax
         pop cx
         pop di
         ret
@@ -100,6 +105,7 @@ codemain SEGMENT para public 'CODE' ; сегмент задачи
     ; ds:di - матрица, bl - индекс удаляемого столбца
     ; ah - кол-во строк матрицы, al - количество столбцов матрицы
         push di
+        push ax
 
         xor cx, cx ; Счётчик цикла
         mov cl, ah 
@@ -108,17 +114,19 @@ codemain SEGMENT para public 'CODE' ; сегмент задачи
         add dl, bl
         mov di, dx ; Смещаем указатель на удаляемый столбец
 
+        mov al, 9 ; Из-за хранения
+
         deleteloop:
             xor dx, dx
             ; Считаем кол-во элементов в матрице после текущего
             add dl, al ; Кол-во элементов в столбце
             
-            ; Умножаем на оставшееся число строк
-            push ax
-            mov al, cl
-            mul dl
-            mov dx, ax
-            pop ax
+            ; ; Умножаем на оставшееся число строк
+            ; push ax
+            ; mov al, cl
+            ; mul dl
+            ; mov dx, ax
+            ; pop ax
 
             sub dl, bl ; Вычитаем кол-во элементов левее текущего
             dec dl ; Вычитаем текущий
@@ -128,12 +136,11 @@ codemain SEGMENT para public 'CODE' ; сегмент задачи
 
             mov dx, di 
             add dl, al ; Сдвигаем указатель матрицы на следующий элемент в стобце
-            dec dl ; Вычитаем 1, так как матрица съехала из-за смещения
             mov di, dx
 
             loop deleteloop ; Пока не прошли по всем строкам
 
-
+        pop ax
         pop di
         ret
 

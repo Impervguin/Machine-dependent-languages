@@ -5,7 +5,7 @@
 double hord(double (*func)(double), double a, double b, size_t iters, double y) {
     double result;
     double tmp;
-    auto f = func;
+    // auto f = func;
     // nextx: Реализует формулу: xi+1 = xi - (b - xi) * (f(xi) - y) / (f(b) - f(xi))
     asm volatile ("movq %3, %%rcx      \n\t"
                   "cmpq $0x00, %%rcx   \n\t"
@@ -46,7 +46,7 @@ double hord(double (*func)(double), double a, double b, size_t iters, double y) 
                   "    fldl %1         \n\t" // Переносим через стек xi в result
                   "    fstpl %0        \n\t"
                   : "=m" (result)
-                  : "m" (a), "m" (b), "m" (iters), "m" (y), "m" (tmp), "m" (f)
+                  : "m" (a), "m" (b), "m" (iters), "m" (y), "m" (tmp), "m" (func)
     );
     return result;
 }

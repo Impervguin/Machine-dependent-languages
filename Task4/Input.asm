@@ -93,9 +93,11 @@ codeInput SEGMENT para public 'CODE' ; сегмент ввода матрицы
         mov ah, 01h
         int 21h
 
-        sub al, 30h
-        cmp al, 10
-        jge digitInputError
+        sub al, '0'
+        cmp al, 9
+        jg digitInputError
+        cmp al, 0
+        jl digitInputError
         
         xor ah, ah ; zf=1
         ret
@@ -134,7 +136,7 @@ codeInput SEGMENT para public 'CODE' ; сегмент ввода матрицы
 
             xor cl, cl ; Зануляем cl, в котором будем хранить текущую итерацию ввода строки
             mov ch, al ; В ch храним количество столбцов матрицы
-            push ax ; Запоминаем ax
+
             Lrow: ; Ввод строки
                 call digitInput
                 jnz errInput
@@ -146,7 +148,10 @@ codeInput SEGMENT para public 'CODE' ; сегмент ввода матрицы
                 cmp cl, ch ; Пока не ввели всю строку
                 jl Lrow
             
-            pop ax
+            mov cl, 9
+            sub cl, ch
+            xor ch, ch
+            add di, cx
 
             pop cx
             inc cx ; Увеличиваем номер текущей строки ввода

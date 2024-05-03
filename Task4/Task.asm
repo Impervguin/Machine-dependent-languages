@@ -9,7 +9,7 @@ stk ENDS
 matdata SEGMENT para public 'DATA'
     w db 1 dup(1)
     h db 1 dup(2)
-    mat db 9 * 9 dup(3)
+    mat db 9 * 9 dup('a')
 matdata ENDS
 
 

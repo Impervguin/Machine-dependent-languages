@@ -78,6 +78,13 @@ codeOutput SEGMENT para public 'CODE' ; сегмент вывода матриц
             inc cl
             cmp cl, al
             jl row ; Пока cl < al
+        
+        ; Из-за хранения
+        mov ch ,9
+        sub ch, cl
+        xor cl, cl
+        xchg cl, ch
+        add di, cx
 
         pop cx
         ret

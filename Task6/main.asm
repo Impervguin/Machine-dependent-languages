@@ -33,7 +33,7 @@ code SEGMENT para public 'code'
 
         inc ticks
         cmp error, 4 ; Если 5-я секунда, то на один тик больше
-        jl werror
+        jge werror
         jmp withouterror
 
     werror: ; с ошибкой
@@ -69,15 +69,15 @@ code SEGMENT para public 'code'
         ; pop cx
         ; pop dx
         ; Предыдущее прерывание
-        pushf
-        push cs
-        mov ax, offset afterprev
-        push ax
+        ; pushf
+        ; push cs
+        ; mov ax, offset afterprev
+        ; push ax
         ; Без этого выводит на каждый тик символы прерывание 08
         mov ax, 0
         jmp cs:prev
-    afterprev:
-        iret
+    ; afterprev:
+    ;     iret
     
     initialize: ; Инициализация резидента
     mov ah, 35h
@@ -98,6 +98,11 @@ code SEGMENT para public 'code'
     mov bx, cs
     mov ds, bx
     int 21h
+
+    mov al, 11110011b ; f3h Команда установки автоповтора
+    out 60h, al
+    mov al, MINSPEED ; Задаём минимальную скорость
+    out 60h, al
 
     ; Выводим сообщение об установке
     mov dx, offset instMessage
@@ -121,6 +126,11 @@ code SEGMENT para public 'code'
         ; Удаляем из памяти резидент(es:0000)
         mov ah, 49h
         int 21h
+
+        mov al, 11110011b ; f3h Команда установки автоповтора
+        out 60h, al
+        mov al, MAXSPEED ; Задаём максимальную скорость
+        out 60h, al
 
         ; Выводим сообщение об удалении резидента
         mov ax, cs

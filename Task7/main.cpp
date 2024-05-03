@@ -33,13 +33,13 @@ int strlenasm(const char *str) {
     //               : "%al"); // Не даёт писать ecx(rcx) edi, esi, видимо из-за того же fastcall
 
     asm volatile (
-                  "movq $0xffffffff, %%rcx\t\n"
+                  "movq $0xffffffffffffffff, %%rcx\t\n"
                   "movb $0, %%al\n\t"
                   "repne scasb\n\t"
                   "neg %%rcx\n\t"
                   "dec %%rcx\n\t"
                   : "=c" (count)
-                  : "S" (str)
+                  : "D" (str)
                   : "%al" // Не даёт писать ecx(rcx) edi, esi, видимо из-за того же fastcall
     );
     return count;
@@ -150,7 +150,7 @@ int main() {
     char copystrsrc6[30] = "We need more tests!";
     char *copystrdst6 = copystrsrc6 + 10;
     // strcpy(copystrsrc3, "Everybody lies!");
-    size_t copylen6 = 13;
+    size_t copylen6 = strlen(copystrsrc6);
     
     std::cout << "String: " << copystrsrc6 << std::endl;
     std::cout << "Copy length: " << copylen6 << std::endl;

@@ -30,6 +30,8 @@ int main() {
     resx = hord(sinfunc, a, b, iters, y);
     std::cout << GREEN << "Найденный x: " << RESET << resx << ". " << GREEN << "f(" << RESET << resx << GREEN << ") = " << RESET << sinfunc(resx) << GREEN << "." << RESET << std::endl;
 
+    std::cout << DELIMITER << std::endl;
+
     std::cout << CYAN << "Тест 3" << RESET << std::endl;
     a = -0.3, b = 0.2;
     y = 1.918;
@@ -38,10 +40,20 @@ int main() {
     resx = hord(sinfunc, a, b, iters, y);
     std::cout << GREEN << "Найденный x: " << RESET << resx << ". " << GREEN << "f(" << RESET << resx << GREEN << ") = " << RESET << sinfunc(resx) << GREEN << "." << RESET << std::endl;
 
+    std::cout << DELIMITER << std::endl;
+
     std::cout << CYAN << "Тест 4" << RESET << std::endl;
     a = -1.8, b = -0.8;
     y = 0;
     iters = 20;
+    std::cout << GREEN << "Начальные границы: [" << a << "," << b << "]. " << "Число итераций: " << iters << "." << " Искомый y = " << y << "." << RESET << std::endl;
+    resx = hord(sinfunc, a, b, iters, y);
+    std::cout << GREEN << "Найденный x: " << RESET << resx << ". " << GREEN << "f(" << RESET << resx << GREEN << ") = " << RESET << sinfunc(resx) << GREEN << "." << RESET << std::endl;
+
+    std::cout << CYAN << "Тест 5" << RESET << std::endl;
+    a = -1, b = 1;
+    y = 0;
+    iters = 5;
     std::cout << GREEN << "Начальные границы: [" << a << "," << b << "]. " << "Число итераций: " << iters << "." << " Искомый y = " << y << "." << RESET << std::endl;
     resx = hord(sinfunc, a, b, iters, y);
     std::cout << GREEN << "Найденный x: " << RESET << resx << ". " << GREEN << "f(" << RESET << resx << GREEN << ") = " << RESET << sinfunc(resx) << GREEN << "." << RESET << std::endl;
