@@ -70,8 +70,6 @@ result_format: .string "Левая граница = %lf\nПравая Грани
 
 .lcomm result_buffer, 1024
 
-printf_string: .string "%ld\n"
-printff_string: .string "%lf\n"
 
 # Адрес приложения
 name: .string "com.calculate.GtkApplication"
@@ -563,6 +561,7 @@ app_activate:
     leaq result_start_text(%rip), %rdi
     call gtk_label_new
     movq -16(%rbp), %rdi
+    
     movq %rax, %rsi
     movq $result_lable_column, %rdx
     movq $result_lable_row, %rcx

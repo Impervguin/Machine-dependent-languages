@@ -57,5 +57,8 @@ int main() {
     std::cout << GREEN << "Начальные границы: [" << a << "," << b << "]. " << "Число итераций: " << iters << "." << " Искомый y = " << y << "." << RESET << std::endl;
     resx = hord(sinfunc, a, b, iters, y);
     std::cout << GREEN << "Найденный x: " << RESET << resx << ". " << GREEN << "f(" << RESET << resx << GREEN << ") = " << RESET << sinfunc(resx) << GREEN << "." << RESET << std::endl;
+
+    std::cout << sinfunc(4) << std::endl;
+    
 }
 
